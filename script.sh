@@ -1,6 +1,7 @@
 #!/bin/bash
 
 clear
+cwd=$(pwd)
 currenthomedir=$homedirct$whoamiforeal
 whoamif='whoami'
 homedirct="/home/"
@@ -12,8 +13,17 @@ directory=$fsl$bufname$fsl
 bufname="HelloWorld"
 timestamp=`date +%Y-%m-%d:%H:%M:%S`
 sumkdir=/BACKUP_TARS/
+fil="./location"
+
 
 #root/sudo only
+if [ ! -e $fil ]; then
+	echo $cwd >> $fil
+	echo "File created. Location of script stored locally for future use."
+else
+	line=$(head -n 1 location)
+	cd $line
+fi
 
 if [ ! -d $sumkdir ]; then
 	if [[ $EUID -ne 0 ]]; then
@@ -55,6 +65,7 @@ if [ ! -d $sumkdir ]; then
 			echo -e "\e[31m2:\e[0m No"			
 			read ansrtocnt
 			if [ $ansrtocnt -eq 1]; then
+				cd $line
 				'./bash_home_backup.sh'
 				exit 0
 			fi
@@ -78,53 +89,63 @@ if [ $bashboivarsneak -eq 1 ]; then
 	read folderchosen
 	cd $HOME
 	tar -czvf $timestamp.tar.gz /BACKUP_TARS/${!folderchosen}
-else
-	if [ $bashboivarsneak -eq 3 ]; then
-		echo "ABORTING DUE TO REQUEST"
-		clear
-		exit
-	fi
-	if [ $bashboivarsneak -eq 2 ]; then
-		echo "What action would you like to perform?"
-		echo -e "\e[31m1:\e[0m Create subfolder"
-		echo -e "\e[31m2:\e[0m List subfolders"
-		echo -e "\e[31m3:\e[0m Exit"
-		read fldrmenu
-		if [ $fldrmenu -eq 1 ]; then
-			echo "Please enter the name of the folder"
-			read fldrmenu_createname
-			echo "Please select permissions for USER (chmod, 0-7)"
-			read usrchm
-			echo "Please select permissions for GROUP (chmod, 0-7)"
-			read grpchm
-			echo "Please select permissions for PUBLIC (chmod, 0-7)"
-			read pubchm
-			echo "Please select user for chown"
-			read usrchwn
-			echo "Please select group for chown"
-			read grpchwn
-			cd /BACKUP_TARS/
-			echo "Creating $fldrmenu_createname subfolder"
-			mkdir $fldrmenu_createname
-			chmod $usrchm$grpchm$pubchm $fldrmenu_createname
-			echo "chmod $usrchm$grpchm$pubchm"
-			echo "chown $usrchwn$spacr$grpchwn"
-			chown $usrchwn$spacr$grpchwn $fldrmenu_createname
-			echo "Complete."
-			sleep 1
-			clear
-			'./bash_home_backup.sh'
-			
+	else	
+		if [ $bashboivarsneak -eq 3 ]; then
+		echo "Goodbye."
+		exit 0		
 		fi
-		if [ $fldermenu -eq 2 ]; then
+		if [ $bashboivarsneak -eq 2 ]; then
+			echo "What action would you like to perform?"
+			echo -e "\e[31m1:\e[0m Create subfolder"
+			echo -e "\e[31m2:\e[0m List subfolders"
+			echo -e "\e[31m3:\e[0m Exit"
+			read fldrmenu
+
+			if [ $fldrmenu -eq 1 ]; then
+				echo "Please enter the name of the folder"
+				read fldrmenu_createname
+				echo "Please select permissions for USER (chmod, 0-7)"
+				read usrchm
+				echo "Please select permissions for GROUP (chmod, 0-7)"
+				read grpchm
+				echo "Please select permissions for PUBLIC (chmod, 0-7)"
+				read pubchm
+				echo "Please select user for chown"
+				read usrchwn
+				echo "Please select group for chown"
+				read grpchwn
+				cd /BACKUP_TARS/
+				echo "Creating $fldrmenu_createname subfolder"
+				mkdir $fldrmenu_createname
+				chmod $usrchm$grpchm$pubchm $fldrmenu_createname
+				echo "chmod $usrchm$grpchm$pubchm"
+				echo "chown $usrchwn$spacr$grpchwn"
+				chown $usrchwn$spacr$grpchwn $fldrmenu_createname
+				echo "Complete."
+				sleep 1
+				clear
+				cd $line
+				'./bash_home_backup.sh'	
+			fi
+		fi
+		if [ $fldrmenu -eq 2 ]; then
 			echo "Listing subfolders of /BACKUP_TARS/"
 			cd /BACKUP_TARS/
 			ls -lah
-			read hyprogrni
-			echo -e "\033[33mHit Enter to Continue >\033[0m"
+			echo "Hit Enter to Continue >"
+			read cwd
 			sleep 1
 			clear
+			cd $line
 			'./bash_home_backup.sh'
 		fi
-	fi
+		if [ $fldrmenu -eq 3 ]; then
+			echo "Goodbye"
+			sleep 1
+			exit 0
+		else
+			clear
+			cd $line
+			'./bash_home_backup.sh'
+		fi
 fi
